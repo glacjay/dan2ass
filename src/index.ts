@@ -1,10 +1,11 @@
 import { Command } from "commander";
-import { getVideoDurationInSeconds } from "get-video-duration";
 import crypto from "crypto";
 import figlet from "figlet";
 import { readFile } from "fs/promises";
+import { getVideoDurationInSeconds } from "get-video-duration";
 import fetch from "node-fetch";
 import path from "path";
+import prompts from "prompts";
 
 console.log(figlet.textSync("dan²ass"));
 
@@ -22,12 +23,26 @@ const pathObject = path.parse(inputFilePath);
 
 interface Match {
   episodeId: number;
+  animeTitle: string;
+  episodeTitle: string;
 }
 
 interface MatchingResult {
   success: boolean;
   isMatched: boolean;
   matches: [Match];
+}
+
+interface Comment {
+  cid: number;
+  /** 出现时间,模式,颜色,用户ID */
+  p: string;
+  m: string;
+}
+
+interface Comments {
+  count: number;
+  comments: [Comment];
 }
 
 async function dan2ass() {
@@ -59,11 +74,45 @@ async function dan2ass() {
     process.exit(1);
   }
 
-  let match = matchingJson.matches[0];
+  let episodeId = matchingJson.matches[0]?.episodeId;
   if (!matchingJson.isMatched) {
-    // TODO: show a list of matches and let user choose
-    match = matchingJson.matches[0];
+    const response = await prompts([
+      {
+        name: "episodeId",
+        type: "select",
+        message: "请选择匹配的集数",
+        choices: matchingJson.matches.map((m) => ({
+          title: `${m.animeTitle} -- ${m.episodeTitle}`,
+          value: m.episodeId,
+        })),
+      },
+    ]);
+    console.log("selection:", response);
+    episodeId = response.episodeId;
   }
+  if (!episodeId) {
+    process.exit(0);
+  }
+
+  const commentsResult = await fetch(
+    `https://api.dandanplay.net/api/v2/comment/${episodeId}?withRelated=true`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    },
+  );
+  if (!commentsResult.ok) {
+    console.error("commentsResult", commentsResult);
+    process.exit(1);
+  }
+  const commentsJson = (await commentsResult.json()) as Comments;
+  if (!commentsJson.count) {
+    console.error("commentsJson", commentsJson);
+    process.exit(1);
+  }
+  console.log("commentsJson", commentsJson);
 
   console.log("DONE");
 }

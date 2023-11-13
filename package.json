@@ -14,11 +14,14 @@
     "commander": "^11.1.0",
     "figlet": "^1.7.0",
     "get-video-duration": "^4.1.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "prompts": "^2.4.2"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.9.0",
+    "@types/prompts": "^2.4.8",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   }
