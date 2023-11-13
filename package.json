@@ -13,6 +13,7 @@
   "dependencies": {
     "commander": "^11.1.0",
     "figlet": "^1.7.0",
+    "get-video-duration": "^4.1.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

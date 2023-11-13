@@ -13,7 +13,7 @@
       "args": [
         "--font-size",
         "16",
-        "~/Downloads/[ANi] 葬送的芙莉蓮 - 02 [1080P][Baha][WEB-DL][AAC AVC][CHT].mp4"
+        "/Users/glacjay/Downloads/[ANi] 葬送的芙莉蓮 - 02 [1080P][Baha][WEB-DL][AAC AVC][CHT].mp4"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]
