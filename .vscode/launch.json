@@ -11,8 +11,7 @@
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/src/index.ts",
       "args": [
-        "--font-size",
-        "16",
+        "--debug",
         "/Users/glacjay/Downloads/[ANi] 葬送的芙莉蓮 - 02 [1080P][Baha][WEB-DL][AAC AVC][CHT].mp4"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
