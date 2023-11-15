@@ -18,10 +18,14 @@ program
   .option("--debug", "debugging")
   .addOption(new Option("--play-res-x", "").default(1920))
   .addOption(new Option("--play-res-y", "").default(1080))
-  .addOption(new Option("--bottom-space", "").default(0))
+  .addOption(new Option("--bottom-space", "").default(200))
   .addOption(new Option("--scroll-time", "").default(16))
   .addOption(new Option("--fix-time", "").default(7))
+  .addOption(new Option("--font-name", "").default("霞鹜文楷"))
+  .addOption(new Option("--font-size", "").default(32))
   .addOption(new Option("--opacity", "").default(0.4))
+  .addOption(new Option("--outline", "").default(1))
+  .addOption(new Option("--shadow", "").default(1))
   .option("--font-size <value>", "font size")
   .argument("<input-file>")
   .parse(process.argv);
@@ -178,17 +182,17 @@ function initializeLayout() {
     options;
   let [paddingTop, paddingRight, paddingBottom, paddingLeft] = padding || [0, 0, 0, 0];
 
-  let defaultFontSize = 24; // fontSize[FontSize.NORMAL];
+  let defaultFontSize = fontSize; // fontSize[FontSize.NORMAL];
   let grids = splitGrids();
   let gridHeight = paddingTop + defaultFontSize + paddingBottom;
 
   return (danmaku: Danmaku): Danmaku | null => {
     let targetGrids = grids[danmaku.mode];
-    let danmakuFontSize = 24; // fontSize[danmaku.fontSizeType];
+    let danmakuFontSize = fontSize; // fontSize[danmaku.fontSizeType];
     let rectWidth =
       paddingLeft +
       // measureTextWidth(fontName, danmakuFontSize, bold, danmaku.content) +
-      24 * danmaku.text.length +
+      fontSize * danmaku.text.length +
       paddingRight;
     let verticalOffset = paddingTop + Math.round((defaultFontSize - danmakuFontSize) / 2);
     let gridNumber =
@@ -257,8 +261,8 @@ interface Grids {
 }
 
 function splitGrids(): Grids {
-  const { padding, playResY, bottomSpace } = options;
-  let defaultFontSize = 24; // fontSize[FontSize.NORMAL];
+  const { padding, playResY, bottomSpace, fontSize } = options;
+  let defaultFontSize = fontSize; // fontSize[FontSize.NORMAL];
   let paddingTop = padding?.[0] || 0;
   let paddingBottom = padding?.[2] || 0;
   let linesCount = Math.floor(
@@ -399,11 +403,7 @@ function generateAssStyle() {
 
   let fontDeclaration = (size: number, i: number) =>
     `Style: F${i},${fontName},${size},${colorStyle},${fontStyle}`;
-  let content = [
-    "[V4+ Styles]",
-    "Format: " + fields.join(","),
-    ...(fontSize ?? [24]).map(fontDeclaration),
-  ];
+  let content = ["[V4+ Styles]", "Format: " + fields.join(","), ...[fontSize].map(fontDeclaration)];
   return content.join("\n");
 }
 
@@ -464,7 +464,7 @@ function generateAssDialogue(danmaku: Danmaku) {
     0, // Layer,
     formatTime(time), // Start
     formatTime(time + (danmaku.mode === DanmakuMode.NORMAL ? scrollTime : fixTime)), // End
-    "F1", // Style
+    "F0", // Style
     "", // Name
     "0000", // MarginL
     "0000", // MarginR
