@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { Command, Option } from "commander";
 import crypto from "crypto";
 import figlet from "figlet";
@@ -6,6 +7,7 @@ import { getVideoDurationInSeconds } from "get-video-duration";
 import fetch from "node-fetch";
 import path from "path";
 import prompts from "prompts";
+import untildify from "untildify";
 
 console.log(figlet.textSync("dan²ass"));
 
@@ -25,7 +27,7 @@ program
   .parse(process.argv);
 const options = program.opts();
 
-const inputFilePath = program.args[0];
+const inputFilePath = path.resolve(untildify(program.args[0]));
 const pathObject = path.parse(inputFilePath);
 
 interface Match {
@@ -78,6 +80,8 @@ async function dan2ass() {
 
   const outputFileContent = generateAssContent(danmakuList);
   await writeFile(path.join(pathObject.dir, `${pathObject.name}.ass`), outputFileContent);
+
+  openFileWithDefaultApp(inputFilePath);
 
   console.log("DONE");
 }
@@ -494,3 +498,16 @@ let formatTime = (seconds: number) => {
 };
 
 let encode = (text: string) => text.replace(/\{/g, "｛").replace(/\}/g, "｝").replace(/\r|\n/g, "");
+
+function openFileWithDefaultApp(filePath: string) {
+  switch (process.platform) {
+    case "darwin":
+      exec(`open '${filePath}'`);
+      break;
+    case "win32":
+      exec(`start '${filePath}'`);
+      break;
+    default:
+      exec(`xdg-open '${filePath}'`);
+  }
+}

@@ -16,7 +16,8 @@
     "get-video-duration": "^4.1.0",
     "lodash-es": "^4.17.21",
     "node-fetch": "^3.3.2",
-    "prompts": "^2.4.2"
+    "prompts": "^2.4.2",
+    "untildify": "^5.0.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
