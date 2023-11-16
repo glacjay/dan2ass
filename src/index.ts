@@ -2,7 +2,8 @@ import { exec } from "child_process";
 import { Command, Option } from "commander";
 import crypto from "crypto";
 import figlet from "figlet";
-import { readFile, writeFile } from "fs/promises";
+import { createReadStream } from "fs";
+import { writeFile } from "fs/promises";
 import { getVideoDurationInSeconds } from "get-video-duration";
 import fetch from "node-fetch";
 import path from "path";
@@ -92,8 +93,18 @@ async function dan2ass() {
 dan2ass();
 
 async function loadDanmakuList(): Promise<Danmaku[]> {
-  const fileBuffer = await readFile(inputFilePath);
-  const fileHash = crypto.createHash("md5").update(fileBuffer).digest("hex");
+  let fileSize = 0;
+  const fileHash = await new Promise<string>((resolve, reject) => {
+    const hashHandle = crypto.createHash("md5");
+    const stream = createReadStream(inputFilePath);
+    stream.on("data", (chunk) => {
+      hashHandle.update(chunk);
+      fileSize += chunk.length;
+    });
+    stream.on("end", () => resolve(hashHandle.digest("hex")));
+    stream.on("error", reject);
+  });
+
   const videoDuration = await getVideoDurationInSeconds(inputFilePath);
 
   const matchingResult = await fetch("https://api.dandanplay.net/api/v2/match", {
@@ -101,7 +112,7 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
     body: JSON.stringify({
       fileName: pathObject.name,
       fileHash,
-      fileSize: fileBuffer.length,
+      fileSize,
       videoDuration: Math.floor(videoDuration),
       matchMode: "hashAndFileName",
     }),
