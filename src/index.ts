@@ -2,8 +2,7 @@ import { exec } from "child_process";
 import { Command, Option } from "commander";
 import crypto from "crypto";
 import figlet from "figlet";
-import { createReadStream } from "fs";
-import { writeFile } from "fs/promises";
+import { open } from "fs/promises";
 import { getVideoDurationInSeconds } from "get-video-duration";
 import fetch from "node-fetch";
 import path from "path";
@@ -78,34 +77,30 @@ interface CommentsResult {
 
 async function dan2ass() {
   let danmakuList = await loadDanmakuList();
-  console.log("danmakuList:", danmakuList.slice(0, 7));
-
   danmakuList = layoutDanmaku(danmakuList);
-  console.log("layouted danmakuList:", danmakuList.slice(0, 7));
 
   const outputFileContent = generateAssContent(danmakuList);
-  await writeFile(path.join(pathObject.dir, `${pathObject.name}.ass`), outputFileContent);
+  const outputFileHandle = await open(path.join(pathObject.dir, `${pathObject.name}.ass`), "w");
+  await outputFileHandle.write(outputFileContent);
+  outputFileHandle.close();
 
+  await new Promise((resolve) => setTimeout(resolve, 200));
   openFileWithDefaultApp(inputFilePath);
-
   console.log("DONE");
 }
 dan2ass();
 
 async function loadDanmakuList(): Promise<Danmaku[]> {
-  let fileSize = 0;
-  const fileHash = await new Promise<string>((resolve, reject) => {
-    const hashHandle = crypto.createHash("md5");
-    const stream = createReadStream(inputFilePath);
-    stream.on("data", (chunk) => {
-      hashHandle.update(chunk);
-      fileSize += chunk.length;
-    });
-    stream.on("end", () => resolve(hashHandle.digest("hex")));
-    stream.on("error", reject);
-  });
+  const fileHandle = await open(inputFilePath, "r");
+  const fileHashRange = 16 * 1024 * 1024;
+  const fileBuffer = Buffer.alloc(fileHashRange);
+  await fileHandle.read(fileBuffer, 0, fileHashRange, 0);
+  const fileHash = crypto.createHash("md5").update(fileBuffer).digest("hex");
 
+  const fileSize = (await fileHandle.stat()).size;
   const videoDuration = await getVideoDurationInSeconds(inputFilePath);
+
+  fileHandle.close();
 
   const matchingResult = await fetch("https://api.dandanplay.net/api/v2/match", {
     method: "POST",
@@ -144,8 +139,9 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
         })),
       },
     ]);
-    console.log("selection:", response);
     episodeId = response.episodeId;
+  } else {
+    console.log("匹配到的集数", matchingJson.matches[0]);
   }
   if (!episodeId) {
     process.exit(0);
@@ -169,7 +165,6 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
     console.error("commentsJson", commentsJson);
     process.exit(1);
   }
-  console.log("commentsJson", commentsJson);
 
   commentsJson.comments.forEach((c) => {
     c.time = parseFloat(c.p.split(",")[0]);
