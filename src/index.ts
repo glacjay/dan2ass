@@ -21,7 +21,7 @@ program
   .addOption(new Option("--bottom-space", "").default(200))
   .addOption(new Option("--scroll-time", "").default(16))
   .addOption(new Option("--fix-time", "").default(7))
-  .addOption(new Option("--font-name", "").default("霞鹜文楷"))
+  .addOption(new Option("--font-name", "").default("Twitter Color Emoji"))
   .addOption(new Option("--font-size", "").default(32))
   .addOption(new Option("--opacity", "").default(0.4))
   .addOption(new Option("--outline", "").default(1))
