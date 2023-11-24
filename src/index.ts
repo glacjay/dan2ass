@@ -201,17 +201,25 @@ function initializeLayout() {
       fontSize * danmaku.text.length +
       paddingRight;
     let verticalOffset = paddingTop + Math.round((defaultFontSize - danmakuFontSize) / 2);
-    let gridNumber =
-      danmaku.mode === DanmakuMode.NORMAL
-        ? resolveAvailableScrollGrid(
-            grids[danmaku.mode],
-            rectWidth,
-            playResX,
-            danmaku.time,
-            scrollTime,
-          )
-        : resolveAvailableFixGrid(grids[danmaku.mode], danmaku.time);
 
+    let gridNumber = -1;
+    for (let i = 0; i < 42; i++) {
+      const delta = i * 0.2;
+      const gn =
+        danmaku.mode === DanmakuMode.NORMAL
+          ? resolveAvailableScrollGrid(
+              grids[danmaku.mode],
+              rectWidth,
+              playResX,
+              danmaku.time + delta,
+              scrollTime,
+            )
+          : resolveAvailableFixGrid(grids[danmaku.mode], danmaku.time + delta);
+      if (gn >= 0) {
+        gridNumber = gn;
+        break;
+      }
+    }
     if (gridNumber < 0) {
       console.warn(`[Warn] Collision ${danmaku.time}: ${danmaku.text}`);
       return null;
