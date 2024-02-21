@@ -23,7 +23,7 @@ program
   .addOption(new Option("--fix-time", "").default(7))
   .addOption(new Option("--font-name", "").default("Twitter Color Emoji"))
   .addOption(new Option("--font-size", "").default(32))
-  .addOption(new Option("--opacity", "").default(0.4))
+  .addOption(new Option("--opacity", "").default(0.6))
   .addOption(new Option("--outline", "").default(1))
   .addOption(new Option("--shadow", "").default(1))
   .option("--font-size <value>", "font size")
