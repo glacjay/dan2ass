@@ -161,7 +161,7 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
     process.exit(1);
   }
   const commentsJson = (await commentsResult.json()) as CommentsResult;
-  if (!commentsJson.count) {
+  if (!Number.isFinite(commentsJson.count)) {
     console.error("commentsJson", commentsJson);
     process.exit(1);
   }
