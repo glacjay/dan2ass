@@ -4,6 +4,7 @@ import crypto from "crypto";
 import figlet from "figlet";
 import { open } from "fs/promises";
 import { getVideoDurationInSeconds } from "get-video-duration";
+import { Agent } from "https";
 import fetch from "node-fetch";
 import path from "path";
 import prompts from "prompts";
@@ -115,6 +116,7 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
+    agent: new Agent({ family: 4 }),
   });
   if (!matchingResult.ok) {
     console.error("matchingResult", matchingResult);
@@ -154,6 +156,7 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
+      agent: new Agent({ family: 4 }),
     },
   );
   if (!commentsResult.ok) {
@@ -165,6 +168,7 @@ async function loadDanmakuList(): Promise<Danmaku[]> {
     console.error("commentsJson", commentsJson);
     process.exit(1);
   }
+  console.log("弹幕数量: ", commentsJson.count);
 
   commentsJson.comments.forEach((c) => {
     c.time = parseFloat(c.p.split(",")[0]);
